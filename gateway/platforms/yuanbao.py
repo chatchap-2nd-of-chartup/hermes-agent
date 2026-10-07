@@ -620,8 +620,8 @@ class RecallGuardMiddleware(InboundMiddleware):
                         "session %s: %s", adapter.name, sid, exc,
                     )
                     return
-                except Exception:
-                    continue
+                except Exception as _exc:
+                    logger.debug("Suppressed exception: %s", _exc, exc_info=True)
                 for entry in transcript:
                     if entry.get("role") == "user" and entry.get("content") == recalled_text:
                         cls._redact(adapter, store, sid, transcript, entry, "[%s] Recall redact: session %s",
@@ -1904,8 +1904,8 @@ class ConnectionManager:
                     continue
                 try:
                     msg = decode_conn_msg(bytes(raw))
-                except Exception:
-                    continue
+                except Exception as _exc:
+                    logger.debug("Suppressed exception: %s", _exc, exc_info=True)
                 head = msg.get("head", {})
                 if head.get("cmd_type", -1) != CMD_TYPE["Response"] or head.get("cmd", "") != "auth-bind":
                     continue
